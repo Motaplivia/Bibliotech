@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus"></i> Novo Empréstimo</h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="/emprestimos/adicionar">
+                        <div class="mb-3">
+                            <label for="livro_id" class="form-label">Livro</label>
+                            <select class="form-select" id="livro_id" name="livro_id" required>
+                                <option value="">Selecione um livro...</option>
+                                {% for livro in livros %}
+                                <option value="{{ livro.id }}">
+                                    {{ livro.titulo }} ({{ livro.exemplares_disponiveis }} disponíveis)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="usuario_id" class="form-label">Usuário</label>
+                            <select class="form-select" id="usuario_id" name="usuario_id" required>
+                                <option value="">Selecione um usuário...</option>
+                                {% for user in usuarios %}
+                                    {% if user.pode_fazer_emprestimo() %}
+                                    <option value="{{ user.id }}">{{ user.nome }} ({{ user.email }})</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">
+                                Apenas usuários que podem fazer empréstimos são mostrados (não administradores, sem multas pendentes e dentro do limite).
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="data_devolucao_prevista" class="form-label">Data de Devolução Prevista</label>
+                            <input type="date" class="form-control" id="data_devolucao_prevista" 
+                                   name="data_devolucao_prevista" required
+                                   min="{{ data_minima }}" max="{{ data_maxima }}">
+                            <small class="text-muted">
+                                A data de devolução deve estar entre hoje e 30 dias.
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/emprestimos" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

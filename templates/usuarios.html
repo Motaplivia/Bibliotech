@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="fas fa-users"></i> Gerenciamento de Usuários</h2>
+        </div>
+        <div class="col text-end">
+            <a href="/usuarios/adicionar" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Adicionar Usuário
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>CPF</th>
+                            <th>Nível de Acesso</th>
+                            <th>Status</th>
+                            <th>Multa</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://ui-avatars.com/api/?name={{ usuario.nome }}&background=FF9F1C&color=fff" 
+                                         alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                                    <div>{{ usuario.nome }}</div>
+                                </div>
+                            </td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.cpf or 'Não informado' }}</td>
+                            <td>
+                                <span class="badge {% if usuario.nivel_acesso == 'admin' %}bg-primary{% else %}bg-info{% endif %}">
+                                    {{ 'Administrador' if usuario.nivel_acesso == 'admin' else 'Leitor' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if usuario.ativo %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'Ativo' if usuario.ativo else 'Inativo' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.multas_pendentes > 0 %}
+                                <span class="text-danger">R$ {{ "%.2f"|format(usuario.multas_pendentes) }}</span>
+                                {% else %}
+                                <span class="text-success">Sem multas</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/usuarios/{{ usuario.id }}" class="btn btn-sm btn-info" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/usuarios/editar/{{ usuario.id }}" class="btn btn-sm btn-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" title="Excluir"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ usuario.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal de Confirmação de Exclusão -->
+                                <div class="modal fade" id="deleteModal{{ usuario.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Exclusão</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Tem certeza que deseja excluir o usuário <strong>{{ usuario.nome }}</strong>?</p>
+                                                {% if usuario.multas_pendentes > 0 %}
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    Este usuário possui multas pendentes no valor de R$ {{ "%.2f"|format(usuario.multas_pendentes) }}.
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <a href="/usuarios/deletar/{{ usuario.id }}" class="btn btn-danger">
+                                                    <i class="fas fa-trash"></i> Excluir
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

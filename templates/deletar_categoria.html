@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="display-4 text-danger text-center">Excluir Categoria</h1>
+    <hr class="border-danger border-2">
+
+    <div class="alert alert-warning text-center">
+        <p>Tem certeza de que deseja excluir a categoria <strong>{{ categoria.nome }}</strong>?</p>
+        <form action="/categorias/deletar/{{ categoria.id }}" method="POST">
+            <button type="submit" class="btn btn-outline-danger btn-lg shadow-sm">Sim, excluir</button>
+            <a href="/categorias" class="btn btn-outline-secondary btn-lg shadow-sm">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

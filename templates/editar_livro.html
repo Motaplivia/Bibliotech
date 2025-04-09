@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> Editar Livro</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/livros/editar/{{ livro.id }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">Título</label>
+                            <input type="text" class="form-control" id="titulo" name="titulo" value="{{ livro.titulo }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="autor" class="form-label">Autor</label>
+                            <input type="text" class="form-control" id="autor" name="autor" value="{{ livro.autor }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ano_publicacao" class="form-label">Ano de Publicação</label>
+                            <input type="number" class="form-control" id="ano_publicacao" name="ano_publicacao" value="{{ livro.ano_publicacao }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn" value="{{ livro.isbn }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantidade" class="form-label">Quantidade de Exemplares</label>
+                            <input type="number" class="form-control" id="quantidade" name="quantidade" value="{{ livro.quantidade }}" min="1" required>
+                            <small class="text-muted">Exemplares disponíveis: {{ livro.exemplares_disponiveis }}</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoria_id" class="form-label">Categoria</label>
+                            <select class="form-select" id="categoria_id" name="categoria_id" required>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if categoria.id == livro.categoria_id %}selected{% endif %}>
+                                    {{ categoria.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="descricao" name="descricao" rows="4" required>{{ livro.descricao }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="numero_paginas" class="form-label">Número de Páginas</label>
+                            <input type="number" class="form-control" id="numero_paginas" name="numero_paginas" value="{{ livro.numero_paginas }}" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="imagem" class="form-label">Imagem do Livro</label>
+                            {% if livro.imagem_url %}
+                            <div class="mb-2">
+                                <img src="{{ livro.imagem_url }}" alt="Imagem atual" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="imagem" name="imagem" accept="image/*">
+                            <small class="text-muted">Formatos aceitos: JPG, PNG, GIF. Deixe em branco para manter a imagem atual.</small>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="/livros" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

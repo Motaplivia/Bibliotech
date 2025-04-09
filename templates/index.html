@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="section-title">Dashboard</h1>
+    </div>
+
+    <!-- Cards Informativos -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="stat-card" style="background: var(--primary-color); color: var(--light-color);">
+                    <div class="stat-info">
+                        <p class="text-white-50">Total de Livros</p>
+                        <h3>{{ total_livros }}</h3>
+                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="stat-card" style="background: var(--secondary-color); color: var(--light-color);">
+                    <div class="stat-info">
+                        <p class="text-white-50">Empréstimos Ativos</p>
+                        <h3>{{ emprestimos_ativos }}</h3>
+                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="stat-card" style="background: var(--accent-color); color: var(--text-color);">
+                    <div class="stat-info">
+                        <p class="text-white-50">Empréstimos Atrasados</p>
+                        <h3>{{ emprestimos_atrasados }}</h3>
+                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="stat-card" style="background: var(--primary-color); color: var(--light-color);">
+                    <div class="stat-info">
+                        <p class="text-white-50">Categorias</p>
+                        <h3>{{ total_categorias }}</h3>
+                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header" style="background: var(--accent-color); color: var(--text-color);">
+                    <h6 class="m-0 font-weight-bold">Empréstimos por Mês</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="emprestimosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header" style="background: var(--secondary-color); color: var(--light-color);">
+                    <h6 class="m-0 font-weight-bold">Categorias Populares</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="categoriasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabelas -->
+    <div class="row g-4 mt-4">
+        <div class="col-xl-6">
+            <div class="card">
+                <div class="card-header" style="background: var(--accent-color); color: var(--text-color);">
+                    <h6 class="m-0 font-weight-bold">Livros Mais Emprestados</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Livro</th>
+                                    <th>Empréstimos</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for livro in livros_mais_emprestados %}
+                                <tr>
+                                    <td>{{ livro.titulo }}</td>
+                                    <td>{{ livro.total_emprestimos }}</td>
+                                    <td>
+                                        {% if livro.disponivel %}
+                                        <span class="badge" style="background-color: var(--secondary-color);">Disponível</span>
+                                        {% else %}
+                                        <span class="badge" style="background-color: var(--accent-color); color: var(--text-color);">Emprestado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card">
+                <div class="card-header" style="background: var(--secondary-color); color: var(--light-color);">
+                    <h6 class="m-0 font-weight-bold">Empréstimos Recentes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Livro</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emprestimo in emprestimos_recentes %}
+                                <tr>
+                                    <td>{{ emprestimo.usuario.nome }}</td>
+                                    <td>{{ emprestimo.livro.titulo }}</td>
+                                    <td>{{ emprestimo.data_emprestimo.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% if emprestimo.atrasado %}
+                                        <span class="badge" style="background-color: #dc3545;">Atrasado</span>
+                                        {% else %}
+                                        <span class="badge" style="background-color: var(--secondary-color);">Em Dia</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table {
+        font-size: 0.875rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.025em;
+    }
+</style>
+
+<script>
+    // Dados de exemplo para os gráficos
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const emprestimos = [65, 59, 80, 81, 56, 55];
+    const devolucoes = [28, 48, 40, 19, 86, 27];
+
+    // Gráfico de Empréstimos
+    const emprestimosCtx = document.getElementById('emprestimosChart').getContext('2d');
+    new Chart(emprestimosCtx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [
+                {
+                    label: 'Empréstimos',
+                    data: emprestimos,
+                    borderColor: 'var(--primary-color)',
+                    backgroundColor: 'rgba(255, 159, 28, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Devoluções',
+                    data: devolucoes,
+                    borderColor: 'var(--secondary-color)',
+                    backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Categorias
+    const categoriasCtx = document.getElementById('categoriasChart').getContext('2d');
+    new Chart(categoriasCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ categorias_populares.labels | tojson }},
+            datasets: [{
+                data: {{ categorias_populares.data | tojson }},
+                backgroundColor: [
+                    'var(--primary-color)',
+                    'var(--secondary-color)',
+                    'var(--accent-color)',
+                    '#FF9F1C',
+                    '#8B4513'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '70%'
+        }
+    });
+</script>
+{% endblock %}

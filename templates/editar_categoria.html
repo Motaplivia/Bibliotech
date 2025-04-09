@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="display-4 text-primary text-center">Editar Categoria</h1>
+    <hr class="border-primary border-2">
+
+    <form method="POST" class="shadow-sm p-4 rounded bg-light">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" id="nome" name="nome" class="form-control" value="{{ categoria.nome }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input type="text" id="descricao" name="descricao" class="form-control" value="{{ categoria.descricao }}" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    </form>
+    
+</div>
+
+{% endblock %}

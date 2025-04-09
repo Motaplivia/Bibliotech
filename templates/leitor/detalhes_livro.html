@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="section-title">Detalhes do Livro</h1>
+        <a href="/leitor/livros-disponiveis" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar para o Acervo
+        </a>
+    </div>
+
+    <!-- Detalhes do Livro -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ livro.imagem_url or 'https://via.placeholder.com/300x400?text=Sem+Capa' }}" class="card-img-top" alt="{{ livro.titulo }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ livro.titulo }}</h5>
+                    <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                    <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
+                    <p class="card-text"><strong>Ano:</strong> {{ livro.ano_publicacao }}</p>
+                    <p class="card-text"><strong>ISBN:</strong> {{ livro.isbn }}</p>
+                    <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria.nome }}</p>
+                    <p class="card-text"><strong>Disponíveis:</strong> {{ livro.exemplares_disponiveis }}</p>
+                    
+                    {% if livro.exemplares_disponiveis > 0 and not emprestimo_atual %}
+                    <form action="/leitor/livro/{{ livro.id }}/emprestar" method="post">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-book"></i> Emprestar
+                        </button>
+                    </form>
+                    {% elif emprestimo_atual %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Você já tem este livro emprestado.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Livro não disponível para empréstimo.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Descrição -->
+            <div class="card mb-4">
+                <div class="card-header" style="background: var(--accent-color); color: var(--text-color);">
+                    <h6 class="m-0 font-weight-bold">Descrição</h6>
+                </div>
+                <div class="card-body">
+                    <p>{{ livro.descricao or 'Nenhuma descrição disponível.' }}</p>
+                </div>
+            </div>
+            
+            <!-- Resenhas -->
+            <div class="card">
+                <div class="card-header" style="background: var(--secondary-color); color: var(--light-color);">
+                    <h6 class="m-0 font-weight-bold">Resenhas</h6>
+                </div>
+                <div class="card-body">
+                    {% if resenhas %}
+                        {% for resenha in resenhas %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between">
+                                <h6>{{ resenha.usuario.nome }}</h6>
+                                <div>
+                                    {% for i in range(5) %}
+                                        {% if i < resenha.avaliacao %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="text-muted small">{{ resenha.data_criacao.strftime('%d/%m/%Y') }}</p>
+                            <p>{{ resenha.texto }}</p>
+                            <hr>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center">Nenhuma resenha disponível.</p>
+                    {% endif %}
+                    
+                    {% if emprestimo_atual and emprestimo_atual.data_devolucao_efetiva %}
+                    <div class="mt-4">
+                        <h6>Adicionar Resenha</h6>
+                        <form action="/leitor/livro/{{ livro.id }}/resenha" method="post">
+                            <div class="mb-3">
+                                <label for="avaliacao" class="form-label">Avaliação</label>
+                                <select class="form-select" id="avaliacao" name="avaliacao" required>
+                                    <option value="1">1 - Péssimo</option>
+                                    <option value="2">2 - Ruim</option>
+                                    <option value="3">3 - Regular</option>
+                                    <option value="4">4 - Bom</option>
+                                    <option value="5">5 - Excelente</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="texto" class="form-label">Sua Resenha</label>
+                                <textarea class="form-control" id="texto" name="texto" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Enviar Resenha
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

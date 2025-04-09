@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão de Usuário</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Atenção!</h4>
+                        <p>Você está prestes a excluir o usuário <strong>{{ usuario_edit.nome }}</strong>.</p>
+                        <p class="mb-0"><i class="fas fa-info-circle"></i> Esta ação não poderá ser desfeita.</p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-user"></i> Informações do Usuário</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <img src="https://ui-avatars.com/api/?name={{ usuario_edit.nome }}&background=FF9F1C&color=fff&size=96" 
+                                     alt="Avatar" class="rounded-circle mb-3" style="width: 96px; height: 96px;">
+                                <h4>{{ usuario_edit.nome }}</h4>
+                                <span class="badge {% if usuario_edit.nivel_acesso == 'admin' %}bg-primary{% else %}bg-info{% endif %}">
+                                    {{ 'Administrador' if usuario_edit.nivel_acesso == 'admin' else 'Leitor' }}
+                                </span>
+                                <span class="badge {% if usuario_edit.ativo %}bg-success{% else %}bg-danger{% endif %} ms-2">
+                                    {{ 'Ativo' if usuario_edit.ativo else 'Inativo' }}
+                                </span>
+                            </div>
+
+                            <dl class="row mb-0">
+                                <dt class="col-sm-3"><i class="fas fa-envelope"></i> Email:</dt>
+                                <dd class="col-sm-9">{{ usuario_edit.email }}</dd>
+
+                                <dt class="col-sm-3"><i class="fas fa-id-card"></i> CPF:</dt>
+                                <dd class="col-sm-9">{{ usuario_edit.cpf or 'Não informado' }}</dd>
+
+                                <dt class="col-sm-3"><i class="fas fa-book-reader"></i> Limite de Empréstimos:</dt>
+                                <dd class="col-sm-9">{{ usuario_edit.limite_emprestimos }}</dd>
+
+                                <dt class="col-sm-3"><i class="fas fa-exclamation-triangle"></i> Multa Atual:</dt>
+                                <dd class="col-sm-9">
+                                    {% if usuario_edit.multa > 0 %}
+                                    <span class="text-danger">R$ {{ "%.2f"|format(usuario_edit.multa) }}</span>
+                                    {% else %}
+                                    <span class="text-success">Sem multas</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        <div class="d-flex justify-content-between">
+                            <a href="/usuarios" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

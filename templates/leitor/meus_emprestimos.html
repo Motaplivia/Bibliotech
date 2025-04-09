@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-book-reader"></i> Meus Empréstimos</h2>
+
+    {% if emprestimos %}
+    <div class="row mt-4">
+        {% for emprestimo in emprestimos %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title">{{ emprestimo.livro.titulo }}</h5>
+                        <span class="badge {% if emprestimo.status == 'Ativo' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ emprestimo.status }}
+                        </span>
+                    </div>
+                    
+                    <p class="card-text">
+                        <i class="fas fa-user"></i> <strong>Autor:</strong> {{ emprestimo.livro.autor }}
+                    </p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt"></i> Emprestado em:<br>
+                                    {{ emprestimo.data_emprestimo.strftime('%d/%m/%Y') }}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-check"></i> Devolução prevista:<br>
+                                    {{ emprestimo.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if emprestimo.data_devolucao_efetiva %}
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-check-circle"></i> Devolvido em:<br>
+                            {{ emprestimo.data_devolucao_efetiva.strftime('%d/%m/%Y') }}
+                        </small>
+                    </p>
+                    {% endif %}
+
+                    {% if emprestimo.status == 'Ativo' %}
+                    <div class="mt-3">
+                        <form method="POST" action="/leitor/emprestimo/{{ emprestimo.id }}/renovar" class="d-inline">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sync"></i> Renovar Empréstimo
+                            </button>
+                        </form>
+                        <a href="/leitor/livro/{{ emprestimo.livro.id }}" class="btn btn-outline-primary">
+                            <i class="fas fa-book"></i> Ver Livro
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle"></i> Você ainda não tem nenhum empréstimo.
+        <a href="/leitor/livros-disponiveis" class="alert-link">Ver livros disponíveis</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

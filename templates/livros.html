@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-sm-flex align-items-center justify-content-between">
+                <h1 class="h3 mb-0 text-gray-800">Biblioteca</h1>
+                <a href="/livros/adicionar" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm me-2"></i>Novo Livro
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Catálogo de Livros</h6>
+            <div class="dropdown no-arrow">
+                <a href="/livros/adicionar" class="btn btn-sm btn-primary shadow-sm d-sm-none">
+                    <i class="fas fa-plus fa-sm"></i>
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="GET" action="/livros" class="d-flex gap-2">
+                        <div class="flex-grow-1">
+                            <input type="text" name="busca" class="form-control" placeholder="Pesquisar por título do livro..." value="{{ request.query_params.get('busca', '') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        {% if request.query_params.get('busca') %}
+                        <a href="/livros" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Livro</th>
+                            <th>ISBN</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for livro in livros %}
+                        <tr>
+                            <td>{{ livro.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-book text-primary me-2"></i>
+                                    <div>
+                                        <div class="fw-bold">{{ livro.titulo }}</div>
+                                        <small class="text-muted">{{ livro.autor }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ livro.isbn }}</td>
+                            <td>
+                                <span class="badge bg-info rounded-pill">
+                                    {{ livro.categoria.nome if livro.categoria else "Sem categoria" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if livro.disponivel %}
+                                        <span class="badge bg-success rounded-pill me-2">Disponível</span>
+                                    {% else %}
+                                        <span class="badge bg-danger rounded-pill me-2">Indisponível</span>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        Disponíveis: {{ livro.exemplares_disponiveis }}/{{ livro.quantidade }}
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/livros/editar/{{ livro.id }}" class="btn btn-warning btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="/livros/deletar/{{ livro.id }}" class="btn btn-danger btn-sm" title="Deletar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

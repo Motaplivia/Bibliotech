@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-sm-flex align-items-center justify-content-between">
+                <h1 class="h3 mb-0 text-gray-800">Categorias</h1>
+                <a href="/categorias/adicionar" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm me-2"></i>Nova Categoria
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Lista de Categorias</h6>
+                    <div class="dropdown no-arrow">
+                        <a href="/categorias/adicionar" class="btn btn-sm btn-primary shadow-sm d-sm-none">
+                            <i class="fas fa-plus fa-sm"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">ID</th>
+                                    <th>Categoria</th>
+                                    <th class="text-end" style="width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for categoria in categorias %}
+                                <tr>
+                                    <td>{{ categoria.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-folder text-warning me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ categoria.nome }}</div>
+                                                {% if categoria.descricao %}
+                                                    <small class="text-muted">{{ categoria.descricao }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="/categorias/editar/{{ categoria.id }}" class="btn btn-warning btn-sm" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="/categorias/deletar/{{ categoria.id }}" class="btn btn-danger btn-sm" title="Deletar">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>   
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

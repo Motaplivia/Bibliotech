@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0"><i class="fas fa-user"></i> Detalhes do Usuário</h2>
+                        <div class="d-flex gap-2">
+                            {% if usuario.tem_permissao('gerenciar_usuarios') %}
+                            <a href="/usuarios/editar/{{ usuario_detalhes.id }}" class="btn btn-light btn-sm">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="https://ui-avatars.com/api/?name={{ usuario_detalhes.nome }}&background=FF9F1C&color=fff&size=128" 
+                             alt="Avatar" class="rounded-circle mb-3" style="width: 128px; height: 128px;">
+                        <h3>{{ usuario_detalhes.nome }}</h3>
+                        <span class="badge {% if usuario_detalhes.nivel_acesso == 'admin' %}bg-primary{% else %}bg-info{% endif %}">
+                            {{ 'Administrador' if usuario_detalhes.nivel_acesso == 'admin' else 'Leitor' }}
+                        </span>
+                        <span class="badge {% if usuario_detalhes.ativo %}bg-success{% else %}bg-danger{% endif %} ms-2">
+                            {{ 'Ativo' if usuario_detalhes.ativo else 'Inativo' }}
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informações Pessoais</h5>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4"><i class="fas fa-envelope"></i> Email:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.email }}</dd>
+
+                                        <dt class="col-sm-4"><i class="fas fa-id-card"></i> CPF:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.cpf or 'Não informado' }}</dd>
+
+                                        <dt class="col-sm-4"><i class="fas fa-phone"></i> Telefone:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.telefone or 'Não informado' }}</dd>
+
+                                        <dt class="col-sm-4"><i class="fas fa-calendar"></i> Data de Nascimento:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.data_nascimento.strftime('%d/%m/%Y') if usuario_detalhes.data_nascimento else 'Não informada' }}</dd>
+
+                                        <dt class="col-sm-4"><i class="fas fa-map-marker-alt"></i> Endereço:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.endereco or 'Não informado' }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-book"></i> Informações de Empréstimo</h5>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4"><i class="fas fa-book-reader"></i> Limite de Empréstimos:</dt>
+                                        <dd class="col-sm-8">{{ usuario_detalhes.limite_emprestimos }}</dd>
+
+                                        <dt class="col-sm-4"><i class="fas fa-exclamation-triangle"></i> Multa Atual:</dt>
+                                        <dd class="col-sm-8">
+                                            {% if usuario_detalhes.multa > 0 %}
+                                            <span class="text-danger">R$ {{ "%.2f"|format(usuario_detalhes.multa) }}</span>
+                                            {% else %}
+                                            <span class="text-success">Sem multas</span>
+                                            {% endif %}
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-clipboard-list"></i> Empréstimos Ativos</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if usuario_detalhes.emprestimos %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Livro</th>
+                                                <th>Data de Empréstimo</th>
+                                                <th>Data de Devolução</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for emprestimo in usuario_detalhes.emprestimos %}
+                                            {% if emprestimo.status == "Ativo" %}
+                                            <tr>
+                                                <td>{{ emprestimo.livro.titulo }}</td>
+                                                <td>{{ emprestimo.data_emprestimo.strftime('%d/%m/%Y') }}</td>
+                                                <td>{{ emprestimo.data_devolucao_prevista.strftime('%d/%m/%Y') }}</td>
+                                                <td>
+                                                    <span class="badge {% if emprestimo.esta_atrasado() %}bg-danger{% else %}bg-success{% endif %}">
+                                                        {% if emprestimo.esta_atrasado() %}
+                                                        <i class="fas fa-exclamation-circle"></i> Atrasado
+                                                        {% else %}
+                                                        <i class="fas fa-check-circle"></i> Em dia
+                                                        {% endif %}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-center text-muted mb-0">
+                                    <i class="fas fa-info-circle"></i> Nenhum empréstimo ativo.
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a href="/usuarios" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o usuário <strong>{{ usuario_detalhes.nome }}</strong>?</p>
+                {% if usuario_detalhes.multa > 0 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Este usuário possui multas pendentes no valor de R$ {{ "%.2f"|format(usuario_detalhes.multa) }}.
+                </div>
+                {% endif %}
+                <p class="text-danger"><i class="fas fa-info-circle"></i> Esta ação não poderá ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <a href="/usuarios/deletar/{{ usuario_detalhes.id }}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Confirmar Exclusão
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

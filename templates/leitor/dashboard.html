@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="section-title"><i class="fas fa-book-reader"></i> Minha Biblioteca</h2>
+            <p class="text-muted">Bem-vindo(a), {{ usuario.nome }}! Aqui está o resumo da sua atividade de leitura.</p>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm" style="background: var(--primary-color); color: var(--light-color);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Empréstimos Ativos</h6>
+                            <h2 class="mb-0 stat-number">{{ emprestimos_ativos|length }}</h2>
+                        </div>
+                        <div class="fs-1">
+                            <i class="fas fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm" style="background: var(--secondary-color); color: var(--light-color);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Livros Lidos</h6>
+                            <h2 class="mb-0 stat-number">{{ livros_lidos|length }}</h2>
+                        </div>
+                        <div class="fs-1">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm" style="background: var(--accent-color); color: var(--text-color);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Próximos a Vencer</h6>
+                            <h2 class="mb-0 stat-number">{{ emprestimos_proximos_vencer|length }}</h2>
+                        </div>
+                        <div class="fs-1">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm {% if multa_total > 0 %}" style="background: #dc3545; color: var(--light-color);"{% else %}" style="background: var(--primary-color); color: var(--light-color);"{% endif %}>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Multa Atual</h6>
+                            <h2 class="mb-0 stat-number">R$ {{ "%.2f"|format(multa_total) }}</h2>
+                        </div>
+                        <div class="fs-1">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Empréstimos Próximos a Vencer -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header" style="background: var(--accent-color); color: var(--text-color);">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Empréstimos Próximos a Vencer</h5>
+                </div>
+                <div class="card-body">
+                    {% if emprestimos_proximos_vencer %}
+                        <div class="list-group">
+                            {% for emprestimo in emprestimos_proximos_vencer %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ emprestimo.livro.titulo }}</h6>
+                                        <small class="text-danger">
+                                            <i class="fas fa-exclamation-circle"></i> 
+                                            Vence em {{ (emprestimo.data_devolucao_prevista - hoje).days }} dias
+                                        </small>
+                                    </div>
+                                    <p class="mb-1"><small><i class="fas fa-user"></i> {{ emprestimo.livro.autor }}</small></p>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt"></i> 
+                                            Emprestado em {{ emprestimo.data_emprestimo.strftime('%d/%m/%Y') }}
+                                        </small>
+                                        <div>
+                                            <form method="POST" action="/leitor/emprestimo/{{ emprestimo.id }}/renovar" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-sync"></i> Renovar
+                                                </button>
+                                            </form>
+                                            <a href="/leitor/livro/{{ emprestimo.livro.id }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-book"></i> Ver
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-3">
+                            <i class="fas fa-check-circle"></i> Nenhum empréstimo próximo a vencer.
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-end">
+                    <a href="/leitor/meus-emprestimos" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list"></i> Ver Todos os Empréstimos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico de Leitura -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header" style="background: var(--secondary-color); color: var(--light-color);">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Histórico de Leitura</h5>
+                </div>
+                <div class="card-body">
+                    {% if emprestimos_concluidos %}
+                        <div class="list-group">
+                            {% for emprestimo in emprestimos_concluidos[:5] %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ emprestimo.livro.titulo }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-check"></i> 
+                                            Devolvido em {{ emprestimo.data_devolucao_efetiva.strftime('%d/%m/%Y') }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1"><small><i class="fas fa-user"></i> {{ emprestimo.livro.autor }}</small></p>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar" role="progressbar" style="width: 100%; background-color: var(--primary-color);" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-3">
+                            <i class="fas fa-info-circle"></i> Você ainda não devolveu nenhum livro.
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-end">
+                    <a href="/leitor/meus-emprestimos" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-history"></i> Ver Histórico Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendações e Categorias Favoritas -->
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header" style="background: var(--primary-color); color: var(--light-color);">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> Recomendações para Você</h5>
+                </div>
+                <div class="card-body">
+                    {% if recomendacoes %}
+                        <div class="row">
+                            {% for livro in recomendacoes %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ livro.titulo }}</h6>
+                                            <p class="card-text"><small><i class="fas fa-user"></i> {{ livro.autor }}</small></p>
+                                            <p class="card-text"><small><i class="fas fa-tag"></i> {{ livro.categoria.nome }}</small></p>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <span class="badge" style="background-color: var(--secondary-color);">
+                                                    <i class="fas fa-book"></i> Disponível
+                                                </span>
+                                                <a href="/leitor/livro/{{ livro.id }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i> Detalhes
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-3">
+                            <i class="fas fa-info-circle"></i> Ainda não temos recomendações para você. Continue lendo!
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-end">
+                    <a href="/leitor/livros-disponiveis" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-search"></i> Explorar Mais Livros
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header" style="background: var(--secondary-color); color: var(--light-color);">
+                    <h5 class="mb-0"><i class="fas fa-heart"></i> Suas Categorias Favoritas</h5>
+                </div>
+                <div class="card-body">
+                    {% if categorias_favoritas %}
+                        <div class="list-group">
+                            {% for categoria in categorias_favoritas %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ categoria[0] }}</h6>
+                                        <small class="text-muted">{{ categoria[1] }} livros</small>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar progress-bar-{{ loop.index }}" role="progressbar" aria-valuenow="{{ categoria[1] }}" aria-valuemin="0" aria-valuemax="{{ categorias_favoritas[0][1] }}"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-3">
+                            <i class="fas fa-info-circle"></i> Você ainda não tem categorias favoritas.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animação para os números nas estatísticas
+    const stats = document.querySelectorAll('.stat-number');
+    
+    stats.forEach(stat => {
+        const target = parseInt(stat.textContent.replace(/[^\d.-]/g, ''));
+        let current = 0;
+        const increment = target / 30; // Ajuste para velocidade da animação
+        const duration = 1000; // Duração em ms
+        const step = duration / 30;
+        
+        const updateCount = () => {
+            if (current < target) {
+                current += increment;
+                if (current > target) current = target;
+                
+                // Formatação especial para valores monetários
+                if (stat.textContent.includes('R$')) {
+                    stat.textContent = 'R$ ' + current.toFixed(2);
+                } else {
+                    stat.textContent = Math.round(current);
+                }
+                
+                setTimeout(updateCount, step);
+            }
+        };
+        
+        updateCount();
+    });
+});
+</script>
+
+<style>
+    .progress-bar {
+        background-color: var(--primary-color);
+    }
+    {% for categoria in categorias_favoritas %}
+    .progress-bar-{{ loop.index }} {
+        width: {{ (categoria[1] / categorias_favoritas[0][1] * 100)|round }}%;
+    }
+    {% endfor %}
+</style>
+{% endblock %} 
