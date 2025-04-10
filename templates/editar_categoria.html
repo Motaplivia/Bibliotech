@@ -1,25 +1,51 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> Editar Categoria</h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                    </div>
+                    {% endif %}
 
-<div class="container mt-5">
-    <h1 class="display-4 text-primary text-center">Editar Categoria</h1>
-    <hr class="border-primary border-2">
+                    <form action="/categorias/{{ categoria.id }}/editar" method="POST">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome da Categoria</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                <input type="text" id="nome" name="nome" class="form-control" 
+                                       value="{{ categoria.nome }}" required>
+                            </div>
+                        </div>
 
-    <form method="POST" class="shadow-sm p-4 rounded bg-light">
-        <div class="mb-3">
-            <label for="nome" class="form-label">Nome</label>
-            <input type="text" id="nome" name="nome" class="form-control" value="{{ categoria.nome }}" required>
+                        <div class="mb-4">
+                            <label for="descricao" class="form-label">Descrição</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                <textarea id="descricao" name="descricao" class="form-control" 
+                                          rows="3" required>{{ categoria.descricao }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/categorias" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        
-        <div class="mb-3">
-            <label for="descricao" class="form-label">Descrição</label>
-            <input type="text" id="descricao" name="descricao" class="form-control" value="{{ categoria.descricao }}" required>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-    </form>
-    
+    </div>
 </div>
-
 {% endblock %}

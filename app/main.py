@@ -73,7 +73,15 @@ app.include_router(routerLeitor)
 
 @app.get("/")
 async def index(request: Request):
-    return RedirectResponse(url="/landing", status_code=status.HTTP_302_FOUND)
+    try:
+        # Tentar obter o usuário atual
+        db = next(get_db())
+        usuario = await obter_usuario_atual(request, db)
+        # Se conseguir obter o usuário, redirecionar para o dashboard
+        return RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
+    except:
+        # Se não conseguir obter o usuário, redirecionar para a landing page
+        return RedirectResponse(url="/landing", status_code=status.HTTP_302_FOUND)
 
 @app.get("/landing")
 async def landing_page(request: Request):
@@ -107,8 +115,68 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         # Categorias populares
         categorias_populares = db.query(
             models.Categoria.nome,
-            func.count(models.Livro.id).label('total_livros')
-        ).join(models.Livro).group_by(models.Categoria.id).order_by(text('total_livros DESC')).limit(5).all()
+            func.count(models.Emprestimo.id).label('total_emprestimos')
+        ).join(
+            models.Livro, models.Livro.categoria_id == models.Categoria.id
+        ).join(
+            models.Emprestimo, models.Emprestimo.livro_id == models.Livro.id
+        ).group_by(
+            models.Categoria.id, models.Categoria.nome
+        ).order_by(text('total_emprestimos DESC')).limit(5).all()
+        
+        # Empréstimos recentes (últimos 5)
+        emprestimos_recentes = db.query(models.Emprestimo).order_by(models.Emprestimo.data_emprestimo.desc()).limit(5).all()
+        
+        # Marcar empréstimos atrasados
+        for emprestimo in emprestimos_recentes:
+            if emprestimo.data_devolucao_efetiva is None and emprestimo.data_devolucao_prevista < date.today():
+                emprestimo.atrasado = True
+            else:
+                emprestimo.atrasado = False
+
+        # Obter dados de empréstimos por mês (últimos 6 meses)
+        hoje = date.today()
+        seis_meses_atras = hoje - timedelta(days=180)
+        
+        # Consulta para empréstimos
+        emprestimos_por_mes = db.query(
+            func.date_trunc('month', models.Emprestimo.data_emprestimo).label('mes'),
+            func.count(models.Emprestimo.id).label('total')
+        ).filter(
+            models.Emprestimo.data_emprestimo >= seis_meses_atras
+        ).group_by(
+            func.date_trunc('month', models.Emprestimo.data_emprestimo)
+        ).order_by('mes').all()
+
+        # Consulta para devoluções
+        devolucoes_por_mes = db.query(
+            func.date_trunc('month', models.Emprestimo.data_devolucao_efetiva).label('mes'),
+            func.count(models.Emprestimo.id).label('total')
+        ).filter(
+            models.Emprestimo.data_devolucao_efetiva >= seis_meses_atras,
+            models.Emprestimo.data_devolucao_efetiva.isnot(None)
+        ).group_by(
+            func.date_trunc('month', models.Emprestimo.data_devolucao_efetiva)
+        ).order_by('mes').all()
+
+        # Preparar dados para o gráfico
+        meses = []
+        emprestimos = []
+        devolucoes = []
+
+        # Preencher os últimos 6 meses
+        for i in range(6):
+            data = hoje - timedelta(days=30*i)
+            mes = data.replace(day=1)
+            meses.insert(0, mes.strftime('%b/%Y'))
+            
+            # Buscar total de empréstimos para este mês
+            total_emp = next((item[1] for item in emprestimos_por_mes if item[0].month == mes.month and item[0].year == mes.year), 0)
+            emprestimos.insert(0, total_emp)
+            
+            # Buscar total de devoluções para este mês
+            total_dev = next((item[1] for item in devolucoes_por_mes if item[0].month == mes.month and item[0].year == mes.year), 0)
+            devolucoes.insert(0, total_dev)
 
         return templates.TemplateResponse(
             "index.html",
@@ -126,14 +194,22 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
                 "categorias_populares": {
                     "labels": [categoria[0] for categoria in categorias_populares],
                     "data": [categoria[1] for categoria in categorias_populares]
+                },
+                "emprestimos_recentes": emprestimos_recentes,
+                "grafico_emprestimos": {
+                    "meses": meses,
+                    "emprestimos": emprestimos,
+                    "devolucoes": devolucoes
                 }
             }
         )
     except HTTPException:
-        return RedirectResponse(url="/landing", status_code=status.HTTP_302_FOUND)
+        # Se houver erro de autenticação, redirecionar para o login
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     except Exception as e:
         print(f"Erro no dashboard: {str(e)}")
-        return RedirectResponse(url="/landing", status_code=status.HTTP_302_FOUND)
+        # Se houver outro erro, redirecionar para o login
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
 @app.get("/login")
 async def login_page(request: Request):

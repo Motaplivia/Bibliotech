@@ -87,7 +87,7 @@ async def adicionar_emprestimo(
                 "adicionar_emprestimo.html",
                 {
                     "request": request,
-                    "error": "Usuário não pode fazer empréstimos. Verifique se é um administrador, tem multas pendentes ou atingiu o limite de empréstimos.",
+                    "error": "Usuário não pode fazer empréstimos. Verifique se tem multas pendentes ou atingiu o limite de empréstimos.",
                     "usuario": usuario_atual,
                     "livros": db.query(models.Livro).filter(models.Livro.exemplares_disponiveis > 0).all(),
                     "usuarios": db.query(models.Usuario).filter(models.Usuario.ativo == True).all(),
@@ -102,7 +102,8 @@ async def adicionar_emprestimo(
             usuario_id=usuario_id,
             data_emprestimo=date.today(),
             data_devolucao_prevista=date.fromisoformat(data_devolucao_prevista),
-            status="Ativo"
+            status="Ativo",
+            renovacoes_feitas=0
         )
         
         # Atualizar quantidade de exemplares disponíveis
@@ -149,34 +150,67 @@ async def devolver_emprestimo(
     if not usuario_atual.tem_permissao("gerenciar_emprestimos"):
         raise HTTPException(status_code=403, detail="Sem permissão para realizar esta ação")
     
-    try:
-        emprestimo = db.query(models.Emprestimo).filter(models.Emprestimo.id == emprestimo_id).first()
-        if not emprestimo:
-            raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
-        
-        if emprestimo.status != "Ativo":
-            raise HTTPException(status_code=400, detail="Este empréstimo já foi finalizado")
-        
-        # Atualizar empréstimo
-        emprestimo.status = "Devolvido"
-        emprestimo.data_devolucao_efetiva = date.today()
-        
-        # Atualizar quantidade de exemplares disponíveis
-        livro = db.query(models.Livro).filter(models.Livro.id == emprestimo.livro_id).first()
-        livro.exemplares_disponiveis = min(livro.quantidade, livro.exemplares_disponiveis + 1)
-        
-        db.commit()
-        
-        return RedirectResponse(url="/emprestimos", status_code=status.HTTP_303_SEE_OTHER)
-    except Exception as e:
+    emprestimo = db.query(models.Emprestimo).filter(models.Emprestimo.id == emprestimo_id).first()
+    if not emprestimo:
+        raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
+    
+    if emprestimo.status != "Ativo":
         return templates.TemplateResponse(
             "emprestimos.html",
             {
                 "request": request,
-                "error": f"Erro ao devolver empréstimo: {str(e)}",
+                "error": "Este empréstimo já foi devolvido",
+                "emprestimos": db.query(models.Emprestimo).all(),
                 "usuario": usuario_atual
             }
         )
+    
+    # Calcular multa se houver atraso
+    emprestimo.calcular_multa()
+    if emprestimo.multa > 0:
+        emprestimo.usuario.multas_pendentes += emprestimo.multa
+    
+    # Realizar a devolução
+    emprestimo.devolver()
+    db.commit()
+    
+    return RedirectResponse(url="/emprestimos", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/leitor/emprestimo/{emprestimo_id}/renovar")
+async def renovar_emprestimo(
+    emprestimo_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario_atual: models.Usuario = Depends(obter_usuario_atual)
+):
+    if usuario_atual.nivel_acesso != "leitor":
+        raise HTTPException(status_code=403, detail="Apenas leitores podem renovar empréstimos")
+    
+    emprestimo = db.query(models.Emprestimo).filter(
+        models.Emprestimo.id == emprestimo_id,
+        models.Emprestimo.usuario_id == usuario_atual.id
+    ).first()
+    
+    if not emprestimo:
+        raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
+    
+    if not emprestimo.pode_renovar():
+        return templates.TemplateResponse(
+            "leitor/meus_emprestimos.html",
+            {
+                "request": request,
+                "error": "Não é possível renovar este empréstimo",
+                "emprestimos": db.query(models.Emprestimo).filter(
+                    models.Emprestimo.usuario_id == usuario_atual.id
+                ).all(),
+                "usuario": usuario_atual
+            }
+        )
+    
+    emprestimo.renovar()
+    db.commit()
+    
+    return RedirectResponse(url="/leitor/meus-emprestimos", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/emprestimos/{emprestimo_id}")
 async def detalhes_emprestimo(

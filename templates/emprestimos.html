@@ -27,6 +27,7 @@
                             <th>Data Empréstimo</th>
                             <th>Devolução Prevista</th>
                             <th>Devolução Efetiva</th>
+                            <th>Renovações</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -47,15 +48,21 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {{ emprestimo.renovacoes_feitas }}/{{ emprestimo.MAX_RENOVACOES }}
+                            </td>
+                            <td>
                                 <span class="badge {% if emprestimo.status == 'Ativo' %}bg-success{% else %}bg-secondary{% endif %}">
                                     {{ emprestimo.status }}
                                 </span>
+                                {% if emprestimo.esta_atrasado() %}
+                                <span class="badge bg-danger">Atrasado</span>
+                                {% endif %}
                             </td>
                             <td>
                                 {% if emprestimo.status == 'Ativo' %}
                                 <form method="POST" action="/emprestimos/{{ emprestimo.id }}/devolver" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Confirmar devolução?')">
-                                        <i class="fas fa-check"></i> Devolver
+                                    <button type="submit" class="btn btn-sm btn-success" title="Devolver">
+                                        <i class="fas fa-check"></i>
                                     </button>
                                 </form>
                                 {% endif %}

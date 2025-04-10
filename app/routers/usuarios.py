@@ -299,8 +299,15 @@ async def deletar_usuario(
                 }
             )
         
+        # Verificar se o usuário está deletando a si mesmo
+        deletando_proprio_usuario = usuario_id == usuario_atual.id
+        
         db.delete(usuario)
         db.commit()
+        
+        # Se o usuário deletou a si mesmo, redirecionar para o logout
+        if deletando_proprio_usuario:
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         
         return RedirectResponse(url="/usuarios", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as e:

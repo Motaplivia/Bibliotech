@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, D
 from sqlalchemy.orm import relationship
 from .database import Base  
 import enum
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 class NivelAcesso(str, enum.Enum):
     ADMIN = "admin"
@@ -95,13 +95,41 @@ class Emprestimo(Base):
     status = Column(String, default="Ativo")
     renovacoes_feitas = Column(Integer, default=0)
     multa = Column(Float, default=0.0)
+    MAX_RENOVACOES = 2  # Limite máximo de renovações
 
     livro = relationship("Livro", back_populates="emprestimos")
     usuario = relationship("Usuario", back_populates="emprestimos")
 
+    def pode_renovar(self):
+        return (
+            self.status == "Ativo" and
+            self.renovacoes_feitas < self.MAX_RENOVACOES and
+            not self.esta_atrasado()
+        )
+
+    def renovar(self):
+        if self.pode_renovar():
+            self.data_devolucao_prevista += timedelta(days=14)  # Renova por mais 14 dias
+            self.renovacoes_feitas += 1
+            return True
+        return False
+
+    def devolver(self):
+        if self.status == "Ativo":
+            self.status = "Devolvido"
+            self.data_devolucao_efetiva = date.today()
+            self.livro.exemplares_disponiveis += 1
+            return True
+        return False
+
+    def esta_atrasado(self):
+        if self.status == "Ativo":
+            return date.today() > self.data_devolucao_prevista
+        return False
+
     def calcular_multa(self):
-        if self.status == "Ativo" and datetime.now().date() > self.data_devolucao_prevista:
-            dias_atraso = (datetime.now().date() - self.data_devolucao_prevista).days
+        if self.status == "Ativo" and self.esta_atrasado():
+            dias_atraso = (date.today() - self.data_devolucao_prevista).days
             self.multa = dias_atraso * 1.0  # R$ 1,00 por dia de atraso
         elif self.status == "Devolvido" and self.data_devolucao_efetiva > self.data_devolucao_prevista:
             dias_atraso = (self.data_devolucao_efetiva - self.data_devolucao_prevista).days

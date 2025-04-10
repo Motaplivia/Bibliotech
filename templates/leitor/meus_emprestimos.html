@@ -12,9 +12,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <h5 class="card-title">{{ emprestimo.livro.titulo }}</h5>
-                        <span class="badge {% if emprestimo.status == 'Ativo' %}bg-success{% else %}bg-secondary{% endif %}">
-                            {{ emprestimo.status }}
-                        </span>
+                        <div>
+                            <span class="badge {% if emprestimo.status == 'Ativo' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ emprestimo.status }}
+                            </span>
+                            {% if emprestimo.esta_atrasado() %}
+                            <span class="badge bg-danger">Atrasado</span>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     <p class="card-text">
@@ -49,18 +54,34 @@
                     </p>
                     {% endif %}
 
-                    {% if emprestimo.status == 'Ativo' %}
                     <div class="mt-3">
-                        <form method="POST" action="/leitor/emprestimo/{{ emprestimo.id }}/renovar" class="d-inline">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-sync"></i> Renovar Empréstimo
-                            </button>
-                        </form>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-sync"></i> Renovações: {{ emprestimo.renovacoes_feitas }}/{{ emprestimo.MAX_RENOVACOES }}
+                            </small>
+                        </p>
+                        {% if emprestimo.status == 'Ativo' %}
+                            {% if emprestimo.pode_renovar() %}
+                            <form method="POST" action="/leitor/emprestimo/{{ emprestimo.id }}/renovar" class="d-inline">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sync"></i> Renovar Empréstimo
+                                </button>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {% if emprestimo.renovacoes_feitas >= emprestimo.MAX_RENOVACOES %}
+                                Limite de renovações atingido.
+                                {% elif emprestimo.esta_atrasado() %}
+                                Não é possível renovar empréstimos atrasados.
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endif %}
                         <a href="/leitor/livro/{{ emprestimo.livro.id }}" class="btn btn-outline-primary">
                             <i class="fas fa-book"></i> Ver Livro
                         </a>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>

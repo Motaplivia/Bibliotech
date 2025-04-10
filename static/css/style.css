@@ -1,0 +1,170 @@
+:root {
+    --color-dark: #353535;
+    --color-primary: #3C6E71;
+    --color-secondary: #284B63;
+    --color-white: #FFFFFF;
+    --color-light: #D9D9D9;
+}
+
+body {
+    background-color: var(--color-white);
+    color: var(--color-dark);
+    font-family: 'Arial', sans-serif;
+}
+
+.navbar {
+    background-color: var(--color-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand, .nav-link {
+    color: var(--color-white) !important;
+}
+
+.nav-link:hover {
+    color: var(--color-light) !important;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.card {
+    border: 1px solid var(--color-light);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.table {
+    color: var(--color-dark);
+}
+
+.table thead th {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(60, 110, 113, 0.25);
+}
+
+.alert-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.alert-secondary {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.footer {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+/* Estilos específicos para formulários */
+.form-label {
+    color: var(--color-dark);
+    font-weight: 500;
+}
+
+/* Estilos para links */
+a {
+    color: var(--color-primary);
+}
+
+a:hover {
+    color: var(--color-secondary);
+    text-decoration: none;
+}
+
+/* Estilos para badges e labels */
+.badge-primary {
+    background-color: var(--color-primary);
+}
+
+.badge-secondary {
+    background-color: var(--color-secondary);
+}
+
+/* Estilos para modais */
+.modal-header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* Estilos para paginação */
+.pagination .page-item.active .page-link {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.pagination .page-link {
+    color: var(--color-primary);
+}
+
+/* Estilos para tooltips */
+.tooltip-inner {
+    background-color: var(--color-primary);
+}
+
+/* Estilos para selects */
+select.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(60, 110, 113, 0.25);
+}
+
+/* Estilos para checkboxes e radios */
+.form-check-input:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* Estilos para placeholders */
+::placeholder {
+    color: var(--color-light);
+}
+
+/* Estilos para scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary);
+} 

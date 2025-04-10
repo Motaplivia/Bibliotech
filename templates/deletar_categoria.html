@@ -1,18 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<div class="container mt-5">
-    <h1 class="display-4 text-danger text-center">Excluir Categoria</h1>
-    <hr class="border-danger border-2">
-
-    <div class="alert alert-warning text-center">
-        <p>Tem certeza de que deseja excluir a categoria <strong>{{ categoria.nome }}</strong>?</p>
-        <form action="/categorias/deletar/{{ categoria.id }}" method="POST">
-            <button type="submit" class="btn btn-outline-danger btn-lg shadow-sm">Sim, excluir</button>
-            <a href="/categorias" class="btn btn-outline-secondary btn-lg shadow-sm">Cancelar</a>
-        </form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-trash-alt me-2"></i>Excluir Categoria
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                        </div>
+                        <h5>Tem certeza que deseja excluir a categoria?</h5>
+                        <div class="alert alert-warning mt-3">
+                            <strong>{{ categoria.nome }}</strong>
+                            {% if categoria.descricao %}
+                            <p class="mb-0 mt-2"><small>{{ categoria.descricao }}</small></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <form action="/categorias/deletar/{{ categoria.id }}" method="POST" class="d-flex justify-content-center gap-2">
+                        <a href="/categorias" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i>Confirmar Exclusão
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 {% endblock %}

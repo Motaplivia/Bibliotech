@@ -33,13 +33,13 @@
                             <select class="form-select" id="usuario_id" name="usuario_id" required>
                                 <option value="">Selecione um usuário...</option>
                                 {% for user in usuarios %}
-                                    {% if user.pode_fazer_emprestimo() %}
+                                    {% if user.nivel_acesso == 'leitor' and user.pode_fazer_emprestimo() %}
                                     <option value="{{ user.id }}">{{ user.nome }} ({{ user.email }})</option>
                                     {% endif %}
                                 {% endfor %}
                             </select>
                             <small class="text-muted">
-                                Apenas usuários que podem fazer empréstimos são mostrados (não administradores, sem multas pendentes e dentro do limite).
+                                Apenas usuários leitores que podem fazer empréstimos são mostrados (sem multas pendentes e dentro do limite).
                             </small>
                         </div>
 

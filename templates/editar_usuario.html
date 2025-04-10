@@ -6,7 +6,12 @@
         <div class="col-md-8 offset-md-2">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0"><i class="fas fa-user-edit"></i> Editar Usuário</h2>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0 text-white"><i class="fas fa-user-edit"></i> Editar Usuário</h2>
+                        <a href="/usuarios/{{ usuario.id }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     {% if error %}
@@ -21,7 +26,7 @@
                                 <label for="nome" class="form-label">Nome *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario_edit.nome }}" required>
+                                    <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}" required>
                                 </div>
                             </div>
 
@@ -29,7 +34,43 @@
                                 <label for="email" class="form-label">Email *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario_edit.email }}" required>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cpf" class="form-label">CPF</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input type="text" class="form-control" id="cpf" name="cpf" value="{{ usuario.cpf or '' }}" placeholder="000.000.000-00">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="telefone" class="form-label">Telefone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="text" class="form-control" id="telefone" name="telefone" value="{{ usuario.telefone or '' }}" placeholder="(00) 00000-0000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" value="{{ usuario.data_nascimento.strftime('%Y-%m-%d') if usuario.data_nascimento else '' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="endereco" class="form-label">Endereço</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <input type="text" class="form-control" id="endereco" name="endereco" value="{{ usuario.endereco or '' }}">
                                 </div>
                             </div>
                         </div>
@@ -48,78 +89,39 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="cpf" class="form-label">CPF</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                    <input type="text" class="form-control" id="cpf" name="cpf" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00" value="{{ usuario_edit.cpf }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="telefone" class="form-label">Telefone</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                    <input type="tel" class="form-control" id="telefone" name="telefone" placeholder="(00) 00000-0000" value="{{ usuario_edit.telefone }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="data_nascimento" class="form-label">Data de Nascimento</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                                    <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" value="{{ usuario_edit.data_nascimento.strftime('%Y-%m-%d') if usuario_edit.data_nascimento }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
                                 <label for="nivel_acesso" class="form-label">Nível de Acesso *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
                                     <select class="form-select" id="nivel_acesso" name="nivel_acesso" required>
-                                        <option value="leitor" {% if usuario_edit.nivel_acesso == 'leitor' %}selected{% endif %}>Leitor</option>
-                                        <option value="admin" {% if usuario_edit.nivel_acesso == 'admin' %}selected{% endif %}>Administrador</option>
+                                        <option value="leitor" {% if usuario.nivel_acesso == 'leitor' %}selected{% endif %}>Leitor</option>
+                                        <option value="admin" {% if usuario.nivel_acesso == 'admin' %}selected{% endif %}>Administrador</option>
                                     </select>
+                            </div>
+                        </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="limite_emprestimos" class="form-label">Limite de Empréstimos *</label>
+                            <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-book-reader"></i></span>
+                                    <input type="number" class="form-control" id="limite_emprestimos" name="limite_emprestimos" value="{{ usuario.limite_emprestimos }}" min="1" max="10" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="endereco" class="form-label">Endereço</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <textarea class="form-control" id="endereco" name="endereco" rows="2">{{ usuario_edit.endereco }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="mb-3" id="limite_emprestimos_container">
-                            <label for="limite_emprestimos" class="form-label">Limite de Empréstimos</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-book"></i></span>
-                                <input type="number" class="form-control" id="limite_emprestimos" name="limite_emprestimos" value="{{ usuario_edit.limite_emprestimos }}" min="0" max="10">
-                            </div>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Apenas para usuários do tipo Leitor. Administradores não podem fazer empréstimos.
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" {% if usuario_edit.ativo %}checked{% endif %}>
-                                <label class="form-check-label" for="ativo">
-                                    <i class="fas fa-toggle-on"></i> Usuário Ativo
-                                </label>
+                                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" {% if usuario.ativo %}checked{% endif %}>
+                                <label class="form-check-label" for="ativo">Usuário Ativo</label>
                             </div>
                         </div>
 
-                        <div class="mt-4">
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/usuarios" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Salvar Alterações
                             </button>
-                            <a href="/usuarios" class="btn btn-secondary ms-2">
-                                <i class="fas fa-times"></i> Cancelar
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -129,59 +131,52 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Máscara para CPF
-    const cpfInput = document.getElementById('cpf');
-    cpfInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-            e.target.value = value;
-        }
-    });
-
-    // Máscara para telefone
-    const telefoneInput = document.getElementById('telefone');
-    telefoneInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length <= 11) {
-            if (value.length > 2) {
-                value = '(' + value.substring(0,2) + ') ' + value.substring(2);
-            }
-            if (value.length > 9) {
-                value = value.substring(0,9) + '-' + value.substring(9);
-            }
-            e.target.value = value;
-        }
-    });
-
-    // Toggle de senha
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('senha');
-    
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.querySelector('i').classList.toggle('fa-eye');
-        this.querySelector('i').classList.toggle('fa-eye-slash');
-    });
-
-    // Controle do limite de empréstimos
-    const nivelAcessoSelect = document.getElementById('nivel_acesso');
-    const limiteEmprestimosContainer = document.getElementById('limite_emprestimos_container');
-    const limiteEmprestimosInput = document.getElementById('limite_emprestimos');
-
-    function toggleLimiteEmprestimos() {
-        if (nivelAcessoSelect.value === 'admin') {
-            limiteEmprestimosContainer.style.display = 'none';
-            limiteEmprestimosInput.value = '0';
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('senha');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
         } else {
-            limiteEmprestimosContainer.style.display = 'block';
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
         }
-    }
+    });
 
-    nivelAcessoSelect.addEventListener('change', toggleLimiteEmprestimos);
-    toggleLimiteEmprestimos();
+    // Format CPF input
+    document.getElementById('cpf').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+        
+            if (value.length > 9) {
+            value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
+        } else if (value.length > 6) {
+            value = value.replace(/^(\d{3})(\d{3})(\d{0,3}).*/, '$1.$2.$3');
+        } else if (value.length > 3) {
+            value = value.replace(/^(\d{3})(\d{0,3}).*/, '$1.$2');
+        }
+        
+        e.target.value = value;
+    });
+
+    // Format phone input
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+        
+        if (value.length > 10) {
+            value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+        } else if (value.length > 6) {
+            value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+        } else if (value.length > 1) {
+            value = value.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+        }
+        
+        e.target.value = value;
 });
 </script>
 {% endblock %} 
